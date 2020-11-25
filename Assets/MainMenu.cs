@@ -8,14 +8,19 @@ public class MainMenu : MonoBehaviour
 {
     public int minValue = 0;
     //How many numbers from the minimum value that will be played with
-    public int rangeOfNums = 10;
-    public int value1;
-    public int value2;
-    //One answer will be fairly close to the original answer to make it tough.  This will determine how close the fake answer will be.
+    public int rangeOfNums = 20;
+    public int equationNum1;
+    public int equationNum2;
+    //This will determine how close the fake answer will be.
     public int rangeFromCorrectAnswer = 3;
     private int correctAnswer;
     private int nearCorrectAnswer;
     private int correctAnswersScore;
+    private List<int> answersArr = new List<int>();
+    private int[] nearCorrectAnswerToTensDigitArr = new int[10];
+    private int mathOp;
+
+    private RandomAnswerGenerator rag = new RandomAnswerGenerator();
 
     public TextMeshProUGUI question;
     public TextMeshProUGUI answer1;
@@ -23,51 +28,93 @@ public class MainMenu : MonoBehaviour
     public TextMeshProUGUI answer3;
     public TextMeshProUGUI answer4;
 
-
     private void Awake()
     {
-        GenerateQuestion();
+        GenerateQuestionAndAnswers();
+        SetQuestionsAndAnswers();
     }
+    public void GenerateQuestionAndAnswers()
+    {
+        GenerateQuestion();
+
+        //Generate 4 choices including the correct answer.
+        GenerateCorrectAnswer();
+        answersArr.Add(correctAnswer);
+        rag.GenerateAnswerList(minValue, rangeOfNums, correctAnswer);
+        answersArr.Add(rag.GetIncorrectAnswerWithinTensDigitOfCorrectAnswer(correctAnswer));
+        answersArr.Add(rag.GetIncorrectAnswerWithinRangeOfCorrectAnswer(rangeOfNums, correctAnswer));
+        answersArr.Add(rag.GetIncorrectAnswerWithinRangeOfCorrectAnswer(rangeOfNums, correctAnswer));
+    }
+
     private void GenerateQuestion()
     {
-        var mathOp = Random.Range(0, 2);
-        value1 = (int)(rangeOfNums * Random.value + minValue);
-        value2 = (int)(rangeOfNums * Random.value + minValue);
+        mathOp = Random.Range(0, 2);
+        equationNum1 = (int)(rangeOfNums * Random.value + minValue);
+        equationNum2 = (int)(rangeOfNums * Random.value + minValue);
+    }
 
+    public void SetQuestionsAndAnswers()
+    {
+        SetQuestion(equationNum1, equationNum2, mathOp);
+        SetAnswers();
+    }
+
+    private void GenerateCorrectAnswer()
+    {
         switch (mathOp)
         {
             //Addition
             case 0:
-                correctAnswer = value1 + value2;
-                question.SetText($"{value1} + {value2}");
+                correctAnswer = equationNum1 + equationNum2;
                 break;
             //Subtraction
             case 1:
-                correctAnswer = value1 - value2;
-                question.SetText($"{value1} - {value2}");
+                correctAnswer = equationNum1 - equationNum2;
                 break;
             default:
                 Debug.Log("Switch case calculating Answer failed. This should never happen");
                 break;
         }
-
-        SetAnswers();
     }
 
+    private void SetQuestion(int equationNum1, int equationNum2, int mathOp)
+    {
+        switch (mathOp)
+        {
+            //Addition
+            case 0:
+                question.SetText($"{equationNum1} + {equationNum2}");
+                break;
+            //Subtraction
+            case 1:
+                question.SetText($"{equationNum1} - {equationNum2}");
+                break;
+            default:
+                Debug.Log("Couldn't set Question. This should never happen");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Randomly sets answers to text on buttons.  Need to fix this because it was rushed  
+    /// </summary>
     private void SetAnswers()
     {
-        CalculateNearCorrectAnswer();
-
+        Sys.Random r = new Sys.Random();
+        int index = r.Next(0, answersArr.Count);
+        answer1.SetText($"{answersArr[index]}");
+        RemoveFromAnswersArray(index);
+        index = r.Next(0, answersArr.Count);
+        answer2.SetText($"{answersArr[index]}");
+        RemoveFromAnswersArray(index);
+        index = r.Next(0, answersArr.Count);
+        answer3.SetText($"{answersArr[index]}");
+        RemoveFromAnswersArray(index);
+        answer4.SetText($"{answersArr[0]}");
     }
 
-    //Create a random number within tens digit of correct answer
-    private void CalculateNearCorrectAnswer()
+    private void RemoveFromAnswersArray(int index)
     {
-        var onesDigitOfCorrectAnswer = correctAnswer % 10;
-        var distanceAwayFromCorrectAnswer = Random.Range(-rangeFromCorrectAnswer, rangeFromCorrectAnswer);
-        
-        //Check if amount from correct answer 
-        if (onesDigitOfCorrectAnswer + distanceAwayFromCorrectAnswer > 10 || onesDigitOfCorrectAnswer + distanceAwayFromCorrectAnswer < 0)
-
-    }
+        answersArr.RemoveAt(index);
+    }   
 }
