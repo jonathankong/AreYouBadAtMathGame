@@ -19,9 +19,9 @@ public class RandomAnswerGenerator
             }
         }
     }
-
+    
     /// <summary>
-    /// This method must be called first before GetIncorrectAnswerWithinRangeOfCorrectAnswer as it assumes all values still exist in the answers list
+    /// This method must be called first before GetIncorrectAnswerWithinRangeOfCorrectAnswer as it assumes all values still exist in the possible answers list
     /// </summary>
     /// <param name="correctAnswer"></param>
     /// <returns></returns>
